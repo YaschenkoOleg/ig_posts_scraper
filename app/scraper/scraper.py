@@ -284,6 +284,7 @@ class InstagramScraper:
 
     def scrape_posts(self, limit: int = 10) -> None:
         # Основний метод скрапінгу постів та збереження даних у БД
+        logger.info(f"limit: {limit}")
         db = next(get_db())
         try:
             self.load_cookies()
@@ -325,11 +326,13 @@ if __name__ == "__main__":
     username = config.get("instagram", "login")
     password = config.get("instagram", "pass")
     limit = config.get("instagram", "scraper_limit")
+    cookies_file = config.get("paths", "cookies_file")
+
     scraper = InstagramScraper(
         profile_url,
         username,
         password,
-        cookies_file="app/scraper/cookies.pkl",
+        cookies_file=cookies_file,
         headless=False
     )
     try:

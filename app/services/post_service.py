@@ -18,7 +18,7 @@ class PostService:
         # Перевіряємо, чи існує пост з таким post_id
         existing_post = PostService.get_post_by_id(db, post_data.get("post_id"))
         if existing_post:
-            logger.info(f"Пост з post_id {post_data.get('post_id')} вже існує. Пропускаємо.")
+            logger.info(f"Пост з id {post_data.get('post_id')} вже існує. Пропускаємо.")
             return existing_post
 
         try:
@@ -26,6 +26,7 @@ class PostService:
             db.add(post)
             db.commit()
             db.refresh(post)
+            logger.info(f"Пост з id {post_data.get('post_id')} додано до бд")
             return post
         except Exception as e:
             db.rollback()

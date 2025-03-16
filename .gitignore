@@ -1,30 +1,12 @@
-# Python bytecode
 __pycache__/
 *.pyc
-
-# IDE specific files
 .idea/
 *.iml
-
-# Docker files
 .dockerignore
-
-# OS generated files
 .DS_Store
 Thumbs.db
-
-# Virtual environment
-venv/
-env/
-
-# Logs
 logs/
-
-# Cookies
-app/scraper/cookies.pkl
-
-# Requirements
+/app/scraper/cookies.pkl
+scraper/cookies.pkl
 celerybeat-schedule
-
-# Other
 *.log

@@ -15,12 +15,8 @@ logger = logging.getLogger(__name__)
 @router.get("/get_last_posts", response_model=List[PostResponse])
 def get_last_posts_api(tag: Optional[str] = Query(None), db: Session = Depends(get_db)):
     posts = PostService.get_last_posts(db)
-    logger.info(f"Получено {len(posts)} постов из БД")
-
     if tag:
         tag_lower = tag.lower()
         for post in posts:
-            logger.info(f"Проверяем пост {post.id} с тегами: {post.tags}")
             post.has_tag = any(tag_lower == t.lower() for t in post.tags)
-
     return posts

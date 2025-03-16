@@ -2,9 +2,14 @@ services:
   web:
     build: .
     container_name: fastapi_app
-    command: sh -c "python app/init_db.py && uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload"
+    command: >
+      sh -c "until nc -z db 5432; do echo 'Очiкування бази данних...'; sleep 2; done &&
+             python app/init_db.py &&
+             uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload"
     volumes:
       - ./:/app
+      - ./scraper:/app/scraper
+
     ports:
       - "8000:8000"
     networks:
@@ -23,7 +28,10 @@ services:
   celery_worker:
     build: .
     container_name: celery_worker
-    command: celery -A app.celery_app.celery_app worker --loglevel=info
+    command: >
+      sh -c "rm -f /app/scraper/cookies.pkl &&
+             until nc -z db 5432; do echo 'Ожидание базы данных...'; sleep 2; done &&
+             celery -A app.celery_app.celery_app worker --loglevel=info"
     user: celery
     volumes:
       - ./:/app
@@ -31,8 +39,10 @@ services:
     networks:
       - app_network
     depends_on:
-      - redis
-      - db
+      redis:
+        condition: service_healthy
+      db:
+        condition: service_healthy
     environment:
       DATABASE_URL: postgresql://postgres:5632@db:5432/test_db
       REDIS_URL: redis://redis:6379/0
@@ -42,6 +52,7 @@ services:
       CELERY_BROKER_URL: redis://redis:6379/0
     tmpfs:
       - /home/celery/chrome-profiles:exec,uid=1000,gid=1000,mode=777
+
 
   celery_beat:
     build: .
@@ -90,10 +101,10 @@ services:
       interval: 5s
       timeout: 3s
       retries: 5
+
 volumes:
   pg_data:
   chrome_profiles:
-
 networks:
   app_network:
     name: app_network

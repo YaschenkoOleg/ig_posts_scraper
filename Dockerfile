@@ -7,6 +7,7 @@ RUN apt-get update && apt-get install -y \
     unzip \
     wget \
     gnupg \
+    netcat-openbsd \
     libnss3 \
     libatk1.0-0 \
     libgbm-dev \
@@ -60,7 +61,7 @@ RUN chown -R celery:celery /app
 RUN mkdir -p /app/.selenium_cache && chown -R celery:celery /app/.selenium_cache
 RUN mkdir -p /app/.cache/selenium && chown -R celery:celery /app/.cache/selenium
 
+RUN mkdir -p /app/scraper
+RUN chown -R celery:celery /app/scraper
 USER celery
 
-
-CMD ["sh", "-c", "python app/init_db.py && uvicorn app.main:app --host 0.0.0.0 --port 8000"]

@@ -11,7 +11,8 @@ def run_scraper():
     username = config.get("instagram", "login")
     password = config.get("instagram", "pass")
     limit = config.get("instagram", "scraper_limit")
-    scraper = InstagramScraper(profile_url, username, password, cookies_file="app/scraper/cookies.pkl", headless=True)
+    cookies_file = config.get("paths", "cookies_file")
+    scraper = InstagramScraper(profile_url, username, password, cookies_file=cookies_file, headless=True)
     try:
         scraper.scrape_posts(limit)
     except Exception as e:
