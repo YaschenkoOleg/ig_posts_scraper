@@ -12,4 +12,4 @@ celery:
   result_backend: "redis://redis:6379/0"
 
 paths:
-  cookies_file: "/app/scraper/cookies.pkl"
+  cookies_file: "/app/app/scraper/cookies.pkl"
