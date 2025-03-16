@@ -13,7 +13,7 @@ def make_celery():
         beat_schedule={
             "run-scraper-every-10-min": {
                 "task": "app.tasks.scraper_tasks.run_scraper",
-                "schedule": 120.0,
+                "schedule": 600.0, # виконання кожнi 10 хвилин
             },
         },
     )
