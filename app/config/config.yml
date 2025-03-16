@@ -1,0 +1,11 @@
+database:
+  url: "postgresql://postgres:5632@db:5432/test_db"
+instagram:
+  profile_url: "https://www.instagram.com/nasa/"
+  scraper_limit: 10
+  login: "nested_set"
+  pass: "Nestedset"
+
+celery:
+  broker_url: "redis://redis:6379/0"
+  result_backend: "redis://redis:6379/0"

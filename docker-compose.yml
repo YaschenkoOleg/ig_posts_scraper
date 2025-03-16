@@ -1,0 +1,100 @@
+services:
+  web:
+    build: .
+    container_name: fastapi_app
+    command: sh -c "python app/init_db.py && uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload"
+    volumes:
+      - ./:/app
+    ports:
+      - "8000:8000"
+    networks:
+      - app_network
+    depends_on:
+      redis:
+        condition: service_healthy
+      db:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql://postgres:5632@db:5432/test_db
+      REDIS_URL: redis://redis:6379/0
+      PYTHONPATH: /app
+      SELENIUM_CACHE_DIR: /app/.selenium_cache
+
+  celery_worker:
+    build: .
+    container_name: celery_worker
+    command: celery -A app.celery_app.celery_app worker --loglevel=info
+    user: celery
+    volumes:
+      - ./:/app
+      - chrome_profiles:/home/celery/chrome-profiles
+    networks:
+      - app_network
+    depends_on:
+      - redis
+      - db
+    environment:
+      DATABASE_URL: postgresql://postgres:5632@db:5432/test_db
+      REDIS_URL: redis://redis:6379/0
+      PYTHONPATH: /app
+      TMPDIR: /home/celery/chrome-profiles
+      SELENIUM_CACHE_DIR: /app/.selenium_cache
+      CELERY_BROKER_URL: redis://redis:6379/0
+    tmpfs:
+      - /home/celery/chrome-profiles:exec,uid=1000,gid=1000,mode=777
+
+  celery_beat:
+    build: .
+    container_name: celery_beat
+    command: celery -A app.celery_worker beat --loglevel=info
+    volumes:
+      - ./:/app
+    networks:
+      - app_network
+    depends_on:
+      - redis
+      - db
+    environment:
+      DATABASE_URL: postgresql://postgres:5632@db:5432/test_db
+      REDIS_URL: redis://redis:6379/0
+      PYTHONPATH: /app
+
+  redis:
+    image: redis:6-alpine
+    container_name: redis
+    ports:
+      - "6379:6379"
+    networks:
+      - app_network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  db:
+    image: postgres:latest
+    container_name: postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 5632
+      POSTGRES_DB: test_db
+    ports:
+      - "5433:5432"
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+    networks:
+      - app_network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+volumes:
+  pg_data:
+  chrome_profiles:
+
+networks:
+  app_network:
+    name: app_network
+    driver: bridge

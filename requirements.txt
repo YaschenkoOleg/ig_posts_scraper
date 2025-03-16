@@ -1,0 +1,9 @@
+fastapi
+pydantic
+PyYAML
+selenium
+SQLAlchemy
+uvicorn
+celery
+redis
+psycopg2-binary
