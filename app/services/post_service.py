@@ -30,7 +30,7 @@ class PostService:
             return post
         except Exception as e:
             db.rollback()
-            logger.error(f"Помилка додавання поста: {str(e)}")
+            logger.info(f"Помилка додавання поста: {str(e)}")
             raise ValueError(f"Помилка додавання поста: {str(e)}")
 
     @staticmethod
